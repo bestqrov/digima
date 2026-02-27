@@ -1,0 +1,118 @@
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+
+import { User, UserDocument } from '../../users/schemas/user.schema';
+import { Agency, AgencyDocument } from '../../agencies/schemas/agency.schema';
+import { Plan, PlanDocument } from '../../plans/schemas/plan.schema';
+import { UsersService } from '../../users/services/users.service';
+import { AgenciesService } from '../../agencies/services/agencies.service';
+
+import { 
+  RegisterDto, 
+  LoginDto, 
+  RefreshTokenDto, 
+  VerifyEmailDto,
+  ResendVerificationDto 
+} from '../dto';
+import { 
+  JwtPayload, 
+  RefreshTokenPayload, 
+  AuthTokens, 
+  UserWithTokens 
+} from '../../../shared/interfaces';
+import { UserRole, AgencyStatus } from '../../../shared/enums';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
+
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.usersService.findByEmail(email);
+    if (user && await bcrypt.compare(password, user.password)) {
+      const { password, ...result } = user.toObject();
+      return result;
+    }
+    return null;
+  }
+
+  async login(loginDto: LoginDto) {
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload: JwtPayload = {
+      sub: user._id,
+      email: user.email,
+      role: user.role,
+      agencyId: user.agencyId.toString(),
+    };
+
+    const refreshPayload: RefreshTokenPayload = {
+      sub: user._id,
+      email: user.email,
+      tokenVersion: user.tokenVersion,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload, {
+        secret: this.configService.get('jwt.accessTokenSecret'),
+        expiresIn: this.configService.get('jwt.accessTokenExpiry'),
+      }),
+      refresh_token: this.jwtService.sign(refreshPayload, {
+        secret: this.configService.get('jwt.refreshTokenSecret'),
+        expiresIn: this.configService.get('jwt.refreshTokenExpiry'),
+      }),
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        agencyId: user.agencyId,
+      },
+    };
+  }
+
+  async refreshToken(refreshTokenDto: RefreshTokenDto) {
+    try {
+      const payload = this.jwtService.verify(refreshTokenDto.refreshToken, {
+        secret: this.configService.get('jwt.refreshTokenSecret'),
+      }) as RefreshTokenPayload;
+
+      const user = await this.usersService.findById(payload.sub);
+      if (!user || user.tokenVersion !== payload.tokenVersion) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const newPayload: JwtPayload = {
+        sub: user._id.toString(),
+        email: user.email,
+        role: user.role,
+        agencyId: user.agencyId.toString(),
+      };
+
+      return {
+        access_token: this.jwtService.sign(newPayload, {
+          secret: this.configService.get('jwt.accessTokenSecret'),
+          expiresIn: this.configService.get('jwt.accessTokenExpiry'),
+        }),
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async logout(userId: string) {
+    await this.usersService.incrementTokenVersion(userId);
+    return { message: 'Logged out successfully' };
+  }
+}

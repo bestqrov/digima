@@ -1,0 +1,27 @@
+version: '3.8'
+
+# Staging environment configuration
+# Extends the main docker-compose.yml with staging-specific overrides
+
+services:
+  mongodb:
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-staging123}
+      MONGO_INITDB_DATABASE: arwa-park-staging
+
+  redis:
+    command: redis-server --requirepass ${REDIS_PASSWORD:-staging123}
+
+  arwa-park-api:
+    environment:
+      NODE_ENV: staging
+      MONGODB_URI: mongodb://arwa-park-user:${MONGO_APP_PASSWORD:-stagingpass123}@mongodb:27017/arwa-park-staging
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-staging123}
+      JWT_SECRET: ${JWT_SECRET:-staging-jwt-secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-staging-refresh-secret}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://staging.yourdomain.com}
+      THROTTLE_LIMIT: 200
+
+  nginx:
+    ports:
+      - "8080:80"

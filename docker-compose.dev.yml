@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # MongoDB Database (Development)
+  mongodb-dev:
+    image: mongo:7.0
+    container_name: arwa-park-mongo-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: arwa-park-dev
+    volumes:
+      - mongodb_dev_data:/data/db
+      - ./scripts/mongo-init-dev.js:/docker-entrypoint-initdb.d/mongo-init-dev.js:ro
+    networks:
+      - arwa-park-dev-network
+
+  # Redis for development
+  redis-dev:
+    image: redis:7.2-alpine
+    container_name: arwa-park-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis123
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - arwa-park-dev-network
+
+volumes:
+  mongodb_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+
+networks:
+  arwa-park-dev-network:
+    driver: bridge
