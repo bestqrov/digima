@@ -1,14 +1,14 @@
 // MongoDB initialization script for production
-db = db.getSiblingDB('arwa-park');
+db = db.getSiblingDB('arwapark');
 
 // Create application user
 db.createUser({
-  user: 'arwa-park-user',
+  user: 'arwapark-user',
   pwd: 'userpass123', // Change this in production
   roles: [
     {
       role: 'readWrite',
-      db: 'arwa-park'
+      db: 'arwapark'
     }
   ]
 });
