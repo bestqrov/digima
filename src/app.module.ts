@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { join } from 'path';
 
 // Configuration
 import { appConfig, databaseConfig, jwtConfig, throttleConfig, validate } from './config';
@@ -27,6 +29,12 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
+    // Static file serving
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'public'),
+      exclude: ['/api*', '/health'],
+    }),
+
     // Configuration with validation
     ConfigModule.forRoot({
       isGlobal: true,
