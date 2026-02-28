@@ -47,18 +47,13 @@ services:
       dockerfile: Dockerfile
       target: production
     restart: unless-stopped
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
       PORT: 3000
       MONGODB_URI: mongodb://admin:${MONGO_ROOT_PASSWORD}@mongodb:27017/arwapark?authSource=admin
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST}
-      EMAIL_SMTP_USER: ${EMAIL_SMTP_USER}
-      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD}
-      FRONTEND_URL: ${FRONTEND_URL}
-      CORS_ORIGINS: ${CORS_ORIGINS}
     ports:
       - "3000:3000"
     depends_on:
