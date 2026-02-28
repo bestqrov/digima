@@ -2,12 +2,12 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/dashboard/trips/new/page": "app/dashboard/trips/new/page.js",
-  "/dashboard/users/new/page": "app/dashboard/users/new/page.js",
-  "/dashboard/trips/page": "app/dashboard/trips/page.js",
-  "/dashboard/vehicles/new/page": "app/dashboard/vehicles/new/page.js",
-  "/dashboard/users/page": "app/dashboard/users/page.js",
-  "/dashboard/vehicles/page": "app/dashboard/vehicles/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/subscription/page": "app/dashboard/subscription/page.js"
+  "/dashboard/users/page": "app/dashboard/users/page.js",
+  "/dashboard/vehicles/new/page": "app/dashboard/vehicles/new/page.js",
+  "/dashboard/vehicles/page": "app/dashboard/vehicles/page.js",
+  "/dashboard/trips/new/page": "app/dashboard/trips/new/page.js",
+  "/dashboard/trips/page": "app/dashboard/trips/page.js",
+  "/dashboard/subscription/page": "app/dashboard/subscription/page.js",
+  "/dashboard/users/new/page": "app/dashboard/users/new/page.js"
 }

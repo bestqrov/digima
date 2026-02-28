@@ -131,11 +131,6 @@ async function bootstrap() {
     });
   });
 
-  // Login page route
-  app.getHttpAdapter().get('/login', (req, res) => {
-    res.sendFile('login.html', { root: './public' });
-  });
-
   // Graceful shutdown
   const shutdown = async (signal: string) => {
     logger.log(`📴 Received ${signal}. Shutting down gracefully...`);
