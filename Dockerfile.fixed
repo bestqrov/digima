@@ -1,4 +1,4 @@
-# Production Dockerfile for Online Deployment (Coolify, Railway, Heroku, etc.)
+# Fixed Production Dockerfile for ArwaPark
 FROM node:18-alpine AS builder
 
 # Set working directory
@@ -16,18 +16,27 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Debug: Show what files we have
+RUN ls -la src/
+
+# Build the application with verbose output
+RUN npm run build && echo "Build completed successfully" || (echo "Build failed" && exit 1)
+
+# Debug: Check if dist folder was created
+RUN ls -la dist/ || (echo "dist folder not found" && exit 1)
+
+# Debug: Check if main.js exists
+RUN ls -la dist/main.js || (echo "main.js not found in dist" && exit 1)
 
 # Production stage
 FROM node:18-alpine AS production
 
-# Install curl for health checks
-RUN apk add --no-cache curl
-
 # Create app user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nestjs -u 1001
+
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Set working directory
 WORKDIR /app
@@ -39,13 +48,16 @@ COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder /app/dist ./dist
 
-# Copy environment file
-COPY --chown=nestjs:nodejs .env.production ./
+# Debug: Verify dist folder was copied
+RUN ls -la dist/ && ls -la dist/main.js
 
 # Create necessary directories
 RUN mkdir -p logs && chown nestjs:nodejs logs
+
+# Change ownership of copied files
+RUN chown -R nestjs:nodejs /app
 
 # Switch to non-root user
 USER nestjs
