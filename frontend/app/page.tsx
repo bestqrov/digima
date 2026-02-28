@@ -1,213 +1,196 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { EyeIcon, EyeSlashIcon, TruckIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/store';
-import {
-  TruckIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  UserGroupIcon,
-  MapIcon,
-  ChartBarIcon,
-} from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-interface SystemStatus {
-  name: string;
-  description: string;
-  version: string;
-  status: string;
-  timestamp: string;
-  endpoints: Record<string, string>;
-  links: Record<string, string>;
-}
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
 
 export default function HomePage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
-  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
-    name: "ArwaPark SaaS API",
-    description: "Multi-tenant SaaS for tourist transport agencies",
-    version: "1.0.0",
-    status: "online",
-    timestamp: new Date().toISOString(),
-    endpoints: {
-      health: "/health",
-      api_documentation: "/api/docs",
-      api_base: "/api/v1",
-      authentication: "/api/v1/auth",
-      agencies: "/api/v1/agencies",
-      users: "/api/v1/users",
-      vehicles: "/api/v1/vehicles",
-      trips: "/api/v1/trips"
-    },
-    links: {
-      documentation: "https://arwapark.digima.cloud/api/docs",
-      health_check: "https://arwapark.digima.cloud/health"
-    }
+  const searchParams = useSearchParams();
+  const [showPassword, setShowPassword] = useState(false);
+  const { login, isLoading } = useAuthStore();
+  
+  const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
   });
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace('/dashboard');
+  const onSubmit = async (data: LoginForm) => {
+    try {
+      await login(data);
+      router.push(callbackUrl);
+    } catch (error) {
+      // Error handling is done in the auth store
     }
-  }, [isAuthenticated, isLoading, router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <LoadingSpinner size="xl" />
-          <p className="mt-4 text-gray-600">Loading ArwaPark...</p>
-        </div>
-      </div>
-    );
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            {/* Logo */}
-            <div className="flex justify-center mb-8">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-lg">
-                <TruckIcon className="w-10 h-10 text-white" />
+      <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          {/* System Status Banner */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
+            <div className="flex items-center">
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
+              <div className="text-sm">
+                <span className="font-medium text-green-800">System Online</span>
+                <span className="text-green-600 ml-2">• API v1.0.0 Ready</span>
               </div>
             </div>
-            
-            {/* Main Title */}
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                ArwaPark
-              </span>
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Multi-tenant SaaS for tourist transport agencies
-            </p>
-            
-            {/* System Status */}
-            <div className="inline-flex items-center px-4 py-2 bg-green-100 rounded-full mb-8">
-              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
-              <span className="text-green-800 font-medium">
-                System {systemStatus.status} • v{systemStatus.version}
-              </span>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div>
+              <div className="flex justify-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <TruckIcon className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+                Sign in to ArwaPark
+              </h2>
+              <p className="mt-2 text-center text-sm text-gray-600">
+                Welcome back to your transport management dashboard
+              </p>
+            </div>
+        
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="form-label">
+                Email address
+              </label>
+              <input
+                {...register('email')}
+                type="email"
+                autoComplete="email"
+                required
+                className="form-input"
+                placeholder="Enter your email"
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
             </div>
             
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <button
-                onClick={() => router.push('/login')}
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105"
-              >
-                Sign In to Dashboard
-              </button>
-              <a
-                href={systemStatus.links.documentation}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-lg shadow-lg hover:bg-gray-50 transition-all border border-gray-200"
-              >
-                View API Documentation
+            <div>
+              <label htmlFor="password" className="form-label">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  {...register('password')}
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  className="form-input pr-10"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <EyeIcon className="h-4 w-4 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                Remember me
+              </label>
+            </div>
+
+            <div className="text-sm">
+              <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
+                Forgot your password?
               </a>
             </div>
           </div>
-        </div>
-      </div>
-      
-      {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Feature 1 */}
-          <div className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <UserGroupIcon className="w-6 h-6 text-blue-600" />
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? (
+                <LoadingSpinner size="sm" className="mr-2" />
+              ) : null}
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Need an account?{' '}
+              <a href="#" className="font-medium text-primary-600 hover:text-primary-500">
+                Contact your administrator
+              </a>
+            </p>
+          </div>
+        </form>
+
+            /* Demo credentials */
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials:</h3>
+              <div className="text-xs text-blue-700 space-y-1">
+                <p><strong>Admin:</strong> admin@arwapark.com / admin123</p>
+                <p><strong>Agency:</strong> agency@example.com / agency123</p>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Multi-Tenant</h3>
-            <p className="text-gray-600">Manage multiple transport agencies with isolated data and custom settings.</p>
           </div>
           
-          {/* Feature 2 */}
-          <div className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <MapIcon className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Trip Management</h3>
-            <p className="text-gray-600">Plan, schedule, and track tourist trips with real-time updates.</p>
-          </div>
-          
-          {/* Feature 3 */}
-          <div className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <ChartBarIcon className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Analytics</h3>
-            <p className="text-gray-600">Comprehensive reports and insights for better business decisions.</p>
+          {/* API Status Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500">
+              Connected to: arwapark.digima.cloud
+            </p>
+            <a 
+              href="https://arwapark.digima.cloud/api/docs" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              View API Documentation
+            </a>
           </div>
         </div>
       </div>
-      
-      {/* System Info */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">System Status</h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold text-gray-700 mb-3">API Endpoints:</h4>
-              <div className="space-y-2 text-sm">
-                {Object.entries(systemStatus.endpoints).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-1">
-                    <span className="text-gray-600 capitalize">{key.replace('_', ' ')}:</span>
-                    <code className="text-blue-600 bg-blue-50 px-2 py-1 rounded">{value}</code>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-700 mb-3">Quick Links:</h4>
-              <div className="space-y-3">
-                <a
-                  href={systemStatus.links.health_check}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  <CheckCircleIcon className="w-4 h-4 mr-2" />
-                  Health Check
-                </a>
-                <a
-                  href={systemStatus.links.documentation}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  <ChartBarIcon className="w-4 h-4 mr-2" />
-                  API Documentation
-                </a>
-              </div>
-              <div className="mt-4 flex items-center text-sm text-gray-500">
-                <ClockIcon className="w-4 h-4 mr-2" />
-                Last updated: {new Date(systemStatus.timestamp).toLocaleString()}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-300">© 2026 ArwaPark SaaS. All rights reserved.</p>
-          <p className="text-sm text-gray-400 mt-2">Powering tourist transport management worldwide</p>
-        </div>
-      </footer>
     </div>
   );
 }
