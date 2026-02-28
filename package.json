@@ -45,6 +45,7 @@
     "cookie-parser": "^1.4.6",
     "express": "^4.22.1",
     "express-rate-limit": "^7.1.0",
+    "framer-motion": "^12.34.3",
     "helmet": "^7.0.0",
     "mongoose": "^7.4.0",
     "passport": "^0.6.0",
