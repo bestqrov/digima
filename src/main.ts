@@ -82,45 +82,43 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api');
 
-  // Swagger documentation (only in development/staging)
-  if (environment !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('ArwaPark API')
-      .setDescription('Multi-tenant SaaS for tourist transport agencies')
-      .setVersion('1.0')
-      .addBearerAuth(
-        {
-          description: 'JWT Authorization header using the Bearer scheme.',
-          name: 'Authorization',
-          bearerFormat: 'Bearer',
-          scheme: 'Bearer',
-          type: 'http',
-          in: 'Header',
-        },
-        'access-token',
-      )
-      .addApiKey(
-        {
-          type: 'apiKey',
-          name: 'x-agency-id',
-          in: 'header',
-          description: 'Agency ID for multi-tenant access',
-        },
-        'agency-id',
-      )
-      .build();
-    
-    const document = SwaggerModule.createDocument(app, config, {
-      operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
-    });
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true,
+  // Swagger documentation 
+  const config = new DocumentBuilder()
+    .setTitle('ArwaPark API')
+    .setDescription('Multi-tenant SaaS for tourist transport agencies')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        description: 'JWT Authorization header using the Bearer scheme.',
+        name: 'Authorization',
+        bearerFormat: 'Bearer',
+        scheme: 'Bearer',
+        type: 'http',
+        in: 'Header',
       },
-    });
+      'access-token',
+    )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'x-agency-id',
+        in: 'header',
+        description: 'Agency ID for multi-tenant access',
+      },
+      'agency-id',
+    )
+    .build();
+  
+  const document = SwaggerModule.createDocument(app, config, {
+    operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+  });
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
-    logger.log(`📚 API Documentation available at: /api/docs`);
-  }
+  logger.log(`📚 API Documentation available at: https://arwapark.digima.cloud/api/docs`);
 
   // Health check endpoint
   app.getHttpAdapter().get('/health', (req, res) => {
@@ -163,7 +161,11 @@ async function bootstrap() {
   logger.log(`🚀 ArwaPark API is running on port: ${port}`);
   logger.log(`🌍 Environment: ${environment}`);
   
-  if (environment !== 'production') {
+  if (environment === 'production') {
+    logger.log(`🌐 API Base: https://arwapark.digima.cloud/api/v1`);
+    logger.log(`📚 API Documentation: https://arwapark.digima.cloud/api/docs`);
+    logger.log(`🔍 Health Check: https://arwapark.digima.cloud/health`);
+  } else {
     logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
     logger.log(`🔍 Health Check: http://localhost:${port}/api/v1/health`);
   }
