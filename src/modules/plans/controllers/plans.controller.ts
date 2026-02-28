@@ -25,7 +25,6 @@ import { UserRole } from '../../../shared/enums';
 
 @ApiTags('Plans')
 @Controller('plans')
-@Version('1')
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}
 

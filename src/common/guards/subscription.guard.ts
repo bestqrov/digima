@@ -31,11 +31,13 @@ export class SubscriptionGuard implements CanActivate {
     }
 
     // Check if agency can access the system
-    if (!agency.canAccess()) {
-      if (agency.isDemoExpired()) {
-        throw new ForbiddenException('Demo period expired. Please upgrade your subscription.');
-      }
+    const currentStatus = agency.status as AgencyStatus;
+    if (currentStatus !== AgencyStatus.ACTIVE && currentStatus !== AgencyStatus.DEMO) {
       throw new ForbiddenException('Agency account suspended');
+    }
+    
+    if (currentStatus === AgencyStatus.DEMO && agency.demoExpiresAt && new Date() > agency.demoExpiresAt) {
+      throw new ForbiddenException('Demo period expired. Please upgrade your subscription.');
     }
 
     // If trying to activate subscription, check email verification

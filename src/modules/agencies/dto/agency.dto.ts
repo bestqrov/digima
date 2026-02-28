@@ -100,7 +100,12 @@ export class CreateAgencyDto {
   language?: string;
 }
 
-export class UpdateAgencyDto extends PartialType(CreateAgencyDto) {}
+export class UpdateAgencyDto extends PartialType(CreateAgencyDto) {
+  @ApiPropertyOptional({ description: 'Agency active status' })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
 
 export class UpdateAgencyStatusDto {
   @ApiProperty({ description: 'New agency status', enum: AgencyStatus })

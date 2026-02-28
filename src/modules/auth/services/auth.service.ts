@@ -287,6 +287,28 @@ export class AuthService {
     await this.userModel.findByIdAndUpdate(userId, { refreshToken: hashedToken });
   }
 
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.userModel.findOne({ email }).populate('agencyId');
+    if (!user) {
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('User account is inactive');
+    }
+
+    if (!user.emailVerified) {
+      throw new UnauthorizedException('Please verify your email before logging in');
+    }
+
+    return this.sanitizeUser(user);
+  }
+
   private async generateEmailVerificationToken(agency: AgencyDocument): Promise<void> {
     const token = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');

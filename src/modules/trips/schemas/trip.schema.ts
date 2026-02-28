@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
+import { Types } from 'mongoose';
 import { TripStatus } from '../../../shared/enums';
 
 export type TripDocument = Trip & Document;

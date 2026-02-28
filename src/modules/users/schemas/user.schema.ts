@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
+import { Types } from 'mongoose';
 import { UserRole } from '../../../shared/enums';
 
 export type UserDocument = User & Document;
@@ -36,6 +37,9 @@ export class User {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
 
   @Prop({ default: 0 })
   tokenVersion: number; // For refresh token invalidation

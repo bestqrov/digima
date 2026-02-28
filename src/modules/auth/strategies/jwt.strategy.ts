@@ -2,14 +2,19 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { UsersService } from '../../users/services/users.service';
+import { User, UserDocument } from '../../users/schemas/user.schema';
 import { JwtPayload } from '../../../shared/interfaces';
+import { AgencyStatus } from '../../../shared/enums';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -28,8 +33,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
 
       // Check if agency can still access the system
-      const agency = await user.populate('agencyId');
-      if (!agency.agencyId.canAccess()) {
+      const userWithAgency = await this.userModel.findById(payload.sub).populate('agencyId').exec();
+      if (!userWithAgency?.agencyId || (userWithAgency.agencyId as any).status !== AgencyStatus.ACTIVE) {
         throw new UnauthorizedException('Agency access suspended or demo expired');
       }
 
