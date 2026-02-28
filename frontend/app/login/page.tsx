@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { EyeIcon, EyeSlashIcon, TruckIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, TruckIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/store';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -43,21 +43,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center">
-              <TruckIcon className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Back to home button */}
+      <div className="absolute top-6 left-6">
+        <button
+          onClick={() => router.push('/')}
+          className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          <ArrowLeftIcon className="w-5 h-5 mr-2" />
+          Back to Home
+        </button>
+      </div>
+      
+      <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          {/* System Status Banner */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6">
+            <div className="flex items-center">
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
+              <div className="text-sm">
+                <span className="font-medium text-green-800">System Online</span>
+                <span className="text-green-600 ml-2">• API v1.0.0 Ready</span>
+              </div>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Sign in to ArwaPark
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Welcome back to your transport management dashboard
-          </p>
-        </div>
+          
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div>
+              <div className="flex justify-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <TruckIcon className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+                Sign in to ArwaPark
+              </h2>
+              <p className="mt-2 text-center text-sm text-gray-600">
+                Welcome back to your transport management dashboard
+              </p>
+            </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
@@ -152,12 +176,29 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Demo credentials */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials:</h3>
-          <div className="text-xs text-blue-700 space-y-1">
-            <p><strong>Admin:</strong> admin@arwapark.com / admin123</p>
-            <p><strong>Agency:</strong> agency@example.com / agency123</p>
+            /* Demo credentials */
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials:</h3>
+              <div className="text-xs text-blue-700 space-y-1">
+                <p><strong>Admin:</strong> admin@arwapark.com / admin123</p>
+                <p><strong>Agency:</strong> agency@example.com / agency123</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* API Status Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500">
+              Connected to: arwapark.digima.cloud
+            </p>
+            <a 
+              href="https://arwapark.digima.cloud/api/docs" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              View API Documentation
+            </a>
           </div>
         </div>
       </div>

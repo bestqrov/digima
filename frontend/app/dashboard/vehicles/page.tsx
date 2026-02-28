@@ -180,7 +180,7 @@ export default function VehiclesPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const 
+  const {
     vehicles,
     pagination,
     filters,
