@@ -131,6 +131,31 @@ async function bootstrap() {
     });
   });
 
+  // Root welcome endpoint (bypasses global prefix)
+  app.getHttpAdapter().get('/', (req, res) => {
+    res.status(200).json({
+      name: 'ArwaPark SaaS API',
+      description: 'Multi-tenant SaaS for tourist transport agencies',
+      version: '1.0.0',
+      status: 'online',
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        health: '/health',
+        api_documentation: '/api/docs',
+        api_base: '/api/v1',
+        authentication: '/api/v1/auth',
+        agencies: '/api/v1/agencies',
+        users: '/api/v1/users',
+        vehicles: '/api/v1/vehicles',
+        trips: '/api/v1/trips'
+      },
+      links: {
+        documentation: 'https://arwapark.digima.cloud/api/docs',
+        health_check: 'https://arwapark.digima.cloud/health'
+      }
+    });
+  });
+
   // Graceful shutdown
   const shutdown = async (signal: string) => {
     logger.log(`📴 Received ${signal}. Shutting down gracefully...`);
