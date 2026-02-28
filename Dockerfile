@@ -41,6 +41,9 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 
+# Copy static files (public directory)
+COPY --from=builder --chown=nestjs:nodejs /app/public ./public
+
 # Create necessary directories
 RUN mkdir -p logs && chown nestjs:nodejs logs
 

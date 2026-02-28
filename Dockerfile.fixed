@@ -53,6 +53,12 @@ COPY --from=builder /app/dist ./dist
 # Debug: Verify dist folder was copied
 RUN ls -la dist/ && ls -la dist/main.js
 
+# Copy static files (public directory)
+COPY --from=builder /app/public ./public
+
+# Debug: Verify public folder was copied
+RUN ls -la public/ && ls -la public/index.html
+
 # Create necessary directories
 RUN mkdir -p logs && chown nestjs:nodejs logs
 
