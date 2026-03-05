@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import * as compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import * as cookieParser from 'cookie-parser';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -133,6 +134,28 @@ async function bootstrap() {
       version: '1.0.0',
     });
   });
+
+  // Frontend proxy: forward non-API requests to Next.js (single-container deployment)
+  if (process.env.FRONTEND_PROXY === 'true') {
+    const frontendProxy = createProxyMiddleware({
+      target: 'http://localhost:3001',
+      changeOrigin: false,
+      ws: true,
+      on: {
+        error: (_err, _req, res: any) => {
+          res.writeHead(503, { 'Content-Type': 'text/plain' });
+          res.end('Frontend service unavailable. Please try again shortly.');
+        },
+      },
+    });
+    app.use((req: any, res: any, next: any) => {
+      if (req.url.startsWith('/api') || req.url === '/health') {
+        return next();
+      }
+      return frontendProxy(req, res, next);
+    });
+    logger.log('🔀 Frontend proxy enabled → http://localhost:3001');
+  }
 
   // Graceful shutdown
   const shutdown = async (signal: string) => {

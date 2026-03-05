@@ -1,58 +1,63 @@
-# Production Dockerfile for ArwaPark
-FROM node:18-alpine AS builder
+# =============================================
+# Stage 1: Build Next.js Frontend
+# =============================================
+FROM node:18-alpine AS frontend-builder
 
-# Set working directory
 WORKDIR /app
 
-# Install dependencies needed for building
-RUN apk add --no-cache python3 make g++
-
-# Copy package files
-COPY package*.json ./
-
-# Install all dependencies (including dev dependencies for building)
+COPY frontend/package*.json ./
 RUN npm ci && npm cache clean --force
+COPY frontend/ .
 
-# Copy source code
-COPY . .
-
-# Build the application
+ARG NEXT_PUBLIC_API_URL=https://arwapark.digima.cloud/api
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN npm run build
 
-# Production stage
-FROM node:18-alpine AS production
+# =============================================
+# Stage 2: Build NestJS Backend
+# =============================================
+FROM node:18-alpine AS backend-builder
 
-# Create app user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Set working directory
 WORKDIR /app
 
-# Copy package files
+RUN apk add --no-cache python3 make g++
 COPY package*.json ./
+RUN npm ci && npm cache clean --force
+COPY . .
+RUN npm run build
 
-# Install only production dependencies
+# =============================================
+# Stage 3: Production Image
+# =============================================
+FROM node:18-alpine AS production
+
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S appuser -u 1001
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy built application from builder stage
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+# NestJS compiled output
+COPY --from=backend-builder --chown=appuser:nodejs /app/dist ./dist
 
-# Create necessary directories
-RUN mkdir -p logs && chown nestjs:nodejs logs
+# Next.js standalone server + static assets
+COPY --from=frontend-builder --chown=appuser:nodejs /app/.next/standalone ./frontend/
+COPY --from=frontend-builder --chown=appuser:nodejs /app/.next/static ./frontend/.next/static
+RUN mkdir -p ./frontend/public && chown appuser:nodejs ./frontend/public
 
-# Switch to non-root user
-USER nestjs
+COPY start.sh ./
+RUN chmod +x start.sh && chown appuser:nodejs start.sh
 
-# Expose port
+RUN mkdir -p logs && chown appuser:nodejs logs && chown appuser:nodejs frontend
+
+USER appuser
+
 EXPOSE 3000
 
-# Health check using curl
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Start the application
-CMD ["node", "dist/src/main.js"]
+CMD ["./start.sh"]
