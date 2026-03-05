@@ -1,1 +1,166 @@
-'use client';\n\nimport { useState, useEffect } from 'react';\nimport { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';\n\ninterface SystemStatusProps {\n  className?: string;\n  showDetails?: boolean;\n}\n\ninterface ApiStatus {\n  status: 'online' | 'offline' | 'maintenance';\n  version: string;\n  timestamp: string;\n  responseTime?: number;\n}\n\nexport default function SystemStatus({ className = '', showDetails = false }: SystemStatusProps) {\n  const [status, setStatus] = useState<ApiStatus>({\n    status: 'online',\n    version: '1.0.0',\n    timestamp: new Date().toISOString(),\n    responseTime: 0\n  });\n  const [loading, setLoading] = useState(false);\n\n  const checkSystemStatus = async () => {\n    setLoading(true);\n    const startTime = performance.now();\n    \n    try {\n      // In a real app, you'd fetch from your health endpoint\n      // For now, we'll simulate the API response you provided\n      await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));\n      \n      const responseTime = performance.now() - startTime;\n      \n      setStatus({\n        status: 'online',\n        version: '1.0.0',\n        timestamp: new Date().toISOString(),\n        responseTime: Math.round(responseTime)\n      });\n    } catch (error) {\n      setStatus(prev => ({\n        ...prev,\n        status: 'offline',\n        timestamp: new Date().toISOString()\n      }));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    checkSystemStatus();\n    \n    // Check status every 30 seconds\n    const interval = setInterval(checkSystemStatus, 30000);\n    \n    return () => clearInterval(interval);\n  }, []);\n\n  const getStatusIcon = () => {\n    switch (status.status) {\n      case 'online':\n        return <CheckCircleIcon className=\"w-4 h-4 text-green-600\" />;\n      case 'maintenance':\n        return <ExclamationTriangleIcon className=\"w-4 h-4 text-yellow-600\" />;\n      case 'offline':\n      default:\n        return <XCircleIcon className=\"w-4 h-4 text-red-600\" />;\n    }\n  };\n\n  const getStatusColor = () => {\n    switch (status.status) {\n      case 'online':\n        return 'bg-green-50 border-green-200';\n      case 'maintenance':\n        return 'bg-yellow-50 border-yellow-200';\n      case 'offline':\n      default:\n        return 'bg-red-50 border-red-200';\n    }\n  };\n\n  const getStatusText = () => {\n    switch (status.status) {\n      case 'online':\n        return 'System Online';\n      case 'maintenance':\n        return 'Maintenance Mode';\n      case 'offline':\n      default:\n        return 'System Offline';\n    }\n  };\n\n  const getTextColor = () => {\n    switch (status.status) {\n      case 'online':\n        return 'text-green-800';\n      case 'maintenance':\n        return 'text-yellow-800';\n      case 'offline':\n      default:\n        return 'text-red-800';\n    }\n  };\n\n  if (!showDetails) {\n    return (\n      <div className={`inline-flex items-center px-3 py-1 rounded-full border ${getStatusColor()} ${className}`}>\n        {getStatusIcon()}\n        <span className={`ml-2 text-sm font-medium ${getTextColor()}`}>\n          {getStatusText()}\n          {status.status === 'online' && ` • v${status.version}`}\n        </span>\n      </div>\n    );\n  }\n\n  return (\n    <div className={`rounded-lg border ${getStatusColor()} p-4 ${className}`}>\n      <div className=\"flex items-center justify-between mb-2\">\n        <div className=\"flex items-center\">\n          {getStatusIcon()}\n          <span className={`ml-2 font-medium ${getTextColor()}`}>\n            {getStatusText()}\n          </span>\n        </div>\n        <button\n          onClick={checkSystemStatus}\n          disabled={loading}\n          className=\"text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50\"\n        >\n          {loading ? 'Checking...' : 'Refresh'}\n        </button>\n      </div>\n      \n      {showDetails && (\n        <div className=\"space-y-2 text-sm\">\n          <div className=\"flex justify-between\">\n            <span className=\"text-gray-600\">Version:</span>\n            <span className=\"font-mono text-gray-800\">v{status.version}</span>\n          </div>\n          \n          {status.responseTime && (\n            <div className=\"flex justify-between\">\n              <span className=\"text-gray-600\">Response Time:</span>\n              <span className=\"font-mono text-gray-800\">{status.responseTime}ms</span>\n            </div>\n          )}\n          \n          <div className=\"flex justify-between\">\n            <span className=\"text-gray-600\">Last Check:</span>\n            <span className=\"font-mono text-gray-800\">\n              {new Date(status.timestamp).toLocaleTimeString()}\n            </span>\n          </div>\n        </div>\n      )}\n    </div>\n  );\n}
+'use client';
+
+import { useState, useEffect } from 'react';
+import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+
+interface SystemStatusProps {
+  className?: string;
+  showDetails?: boolean;
+}
+
+interface ApiStatus {
+  status: 'online' | 'offline' | 'maintenance';
+  version: string;
+  timestamp: string;
+  responseTime?: number;
+}
+
+export default function SystemStatus({ className = '', showDetails = false }: SystemStatusProps) {
+  const [status, setStatus] = useState<ApiStatus>({
+    status: 'online',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    responseTime: 0
+  });
+  const [loading, setLoading] = useState(false);
+
+  const checkSystemStatus = async () => {
+    setLoading(true);
+    const startTime = performance.now();
+    
+    try {
+      // In a real app, you'd fetch from your health endpoint
+      // For now, we'll simulate the API response you provided
+      await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
+      
+      const responseTime = performance.now() - startTime;
+      
+      setStatus({
+        status: 'online',
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        responseTime: Math.round(responseTime)
+      });
+    } catch (error) {
+      setStatus(prev => ({
+        ...prev,
+        status: 'offline',
+        timestamp: new Date().toISOString()
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkSystemStatus();
+    
+    // Check status every 30 seconds
+    const interval = setInterval(checkSystemStatus, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusIcon = () => {
+    switch (status.status) {
+      case 'online':
+        return <CheckCircleIcon className=\"w-4 h-4 text-green-600\" />;
+      case 'maintenance':
+        return <ExclamationTriangleIcon className=\"w-4 h-4 text-yellow-600\" />;
+      case 'offline':
+      default:
+        return <XCircleIcon className=\"w-4 h-4 text-red-600\" />;
+    }
+  };
+
+  const getStatusColor = () => {
+    switch (status.status) {
+      case 'online':
+        return 'bg-green-50 border-green-200';
+      case 'maintenance':
+        return 'bg-yellow-50 border-yellow-200';
+      case 'offline':
+      default:
+        return 'bg-red-50 border-red-200';
+    }
+  };
+
+  const getStatusText = () => {
+    switch (status.status) {
+      case 'online':
+        return 'System Online';
+      case 'maintenance':
+        return 'Maintenance Mode';
+      case 'offline':
+      default:
+        return 'System Offline';
+    }
+  };
+
+  const getTextColor = () => {
+    switch (status.status) {
+      case 'online':
+        return 'text-green-800';
+      case 'maintenance':
+        return 'text-yellow-800';
+      case 'offline':
+      default:
+        return 'text-red-800';
+    }
+  };
+
+  if (!showDetails) {
+    return (
+      <div className={`inline-flex items-center px-3 py-1 rounded-full border ${getStatusColor()} ${className}`}>
+        {getStatusIcon()}
+        <span className={`ml-2 text-sm font-medium ${getTextColor()}`}>
+          {getStatusText()}
+          {status.status === 'online' && ` • v${status.version}`}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`rounded-lg border ${getStatusColor()} p-4 ${className}`}>
+      <div className=\"flex items-center justify-between mb-2\">
+        <div className=\"flex items-center\">
+          {getStatusIcon()}
+          <span className={`ml-2 font-medium ${getTextColor()}`}>
+            {getStatusText()}
+          </span>
+        </div>
+        <button
+          onClick={checkSystemStatus}
+          disabled={loading}
+          className=\"text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50\"
+        >
+          {loading ? 'Checking...' : 'Refresh'}
+        </button>
+      </div>
+      
+      {showDetails && (
+        <div className=\"space-y-2 text-sm\">
+          <div className=\"flex justify-between\">
+            <span className=\"text-gray-600\">Version:</span>
+            <span className=\"font-mono text-gray-800\">v{status.version}</span>
+          </div>
+          
+          {status.responseTime && (
+            <div className=\"flex justify-between\">
+              <span className=\"text-gray-600\">Response Time:</span>
+              <span className=\"font-mono text-gray-800\">{status.responseTime}ms</span>
+            </div>
+          )}
+          
+          <div className=\"flex justify-between\">
+            <span className=\"text-gray-600\">Last Check:</span>
+            <span className=\"font-mono text-gray-800\">
+              {new Date(status.timestamp).toLocaleTimeString()}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
