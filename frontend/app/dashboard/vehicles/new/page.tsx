@@ -83,8 +83,16 @@ export default function NewVehiclePage() {
       const vehicleData: CreateVehicleData = {
         ...data,
         features: data.features?.map((f) => f.value).filter(Boolean) || [],
-        driver: hasDriver && data.driver?.name ? data.driver : undefined,
-        maintenance: hasMaintenance ? data.maintenance : undefined,
+        driver: hasDriver && data.driver?.name ? {
+          name: data.driver.name,
+          phone: data.driver.phone || '',
+          licenseNumber: data.driver.licenseNumber || '',
+        } : undefined,
+        maintenance: hasMaintenance && data.maintenance ? {
+          lastService: data.maintenance.lastService || '',
+          nextService: data.maintenance.nextService,
+          mileage: data.maintenance.mileage,
+        } : undefined,
       };
 
       await createVehicle(vehicleData);
