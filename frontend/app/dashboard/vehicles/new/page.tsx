@@ -24,7 +24,7 @@ const vehicleSchema = z.object({
     passengers: z.number().min(1, 'Passenger capacity must be at least 1'),
     luggage: z.number().optional(),
   }),
-  features: z.array(z.string()).optional(),
+  features: z.array(z.object({ value: z.string() })).optional(),
   driver: z.object({
     name: z.string().optional(),
     phone: z.string().optional(),
@@ -64,7 +64,7 @@ export default function NewVehiclePage() {
       capacity: {
         passengers: 1,
       },
-      features: [],
+      features: [{ value: '' }],
       insurance: {
         provider: '',
         policyNumber: '',
@@ -82,7 +82,7 @@ export default function NewVehiclePage() {
     try {
       const vehicleData: CreateVehicleData = {
         ...data,
-        features: data.features?.filter(Boolean) || [],
+        features: data.features?.map((f) => f.value).filter(Boolean) || [],
         driver: hasDriver && data.driver?.name ? data.driver : undefined,
         maintenance: hasMaintenance ? data.maintenance : undefined,
       };
@@ -227,7 +227,7 @@ export default function NewVehiclePage() {
                 <h3 className="text-lg font-medium text-gray-900">Features</h3>
                 <button
                   type="button"
-                  onClick={() => append('')}
+                  onClick={() => append({ value: '' })}
                   className="btn-secondary flex items-center text-sm"
                 >
                   <PlusIcon className="h-4 w-4 mr-1" />
@@ -241,7 +241,7 @@ export default function NewVehiclePage() {
                     <div key={field.id} className="flex items-center space-x-3">
                       <input
                         type="text"
-                        {...register(`features.${index}`)}
+                        {...register(`features.${index}.value` as const)}
                         className="form-input flex-1"
                         placeholder="e.g., Air Conditioning, WiFi, GPS"
                       />
