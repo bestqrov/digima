@@ -121,9 +121,25 @@ export default function NewTripPage() {
 
   const onSubmit = async (data: TripFormData) => {
     try {
+      const mapCoords = (coords?: { lat?: number; lng?: number }) =>
+        coords?.lat != null && coords?.lng != null
+          ? { lat: coords.lat, lng: coords.lng }
+          : undefined;
+
       const tripData: CreateTripData = {
         ...data,
         driverId: data.driverId || undefined,
+        itinerary: {
+          ...data.itinerary,
+          pickupLocation: {
+            ...data.itinerary.pickupLocation,
+            coordinates: mapCoords(data.itinerary.pickupLocation.coordinates),
+          },
+          dropoffLocation: {
+            ...data.itinerary.dropoffLocation,
+            coordinates: mapCoords(data.itinerary.dropoffLocation.coordinates),
+          },
+        },
         pricing: {
           ...data.pricing,
           additionalCharges: data.pricing.additionalCharges?.filter(

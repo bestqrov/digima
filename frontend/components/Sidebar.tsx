@@ -9,10 +9,10 @@ import {
   MapIcon,
   UsersIcon,
   CreditCardIcon,
-  SettingsIcon,
-  LogoutIcon,
-  MenuIcon,
-  XIcon,
+  Cog6ToothIcon as SettingsIcon,
+  ArrowRightOnRectangleIcon as LogoutIcon,
+  Bars3Icon as MenuIcon,
+  XMarkIcon as XIcon,
   BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/store';
