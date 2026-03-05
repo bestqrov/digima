@@ -141,11 +141,9 @@ async function bootstrap() {
       target: 'http://localhost:3001',
       changeOrigin: false,
       ws: true,
-      on: {
-        error: (_err, _req, res: any) => {
-          res.writeHead(503, { 'Content-Type': 'text/plain' });
-          res.end('Frontend service unavailable. Please try again shortly.');
-        },
+      onError: (_err: any, _req: any, res: any) => {
+        res.writeHead(503, { 'Content-Type': 'text/plain' });
+        res.end('Frontend service unavailable. Please try again shortly.');
       },
     });
     app.use((req: any, res: any, next: any) => {
