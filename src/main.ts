@@ -22,6 +22,20 @@ async function bootstrap() {
   const port = configService.get<number>('app.port') || 3000;
   const environment = configService.get<string>('app.environment');
 
+  // Root handler — must be registered as raw middleware BEFORE NestJS router
+  app.use((req: any, res: any, next: any) => {
+    if (req.method === 'GET' && req.url === '/') {
+      return res.status(200).json({
+        message: 'ArwaPark API is running',
+        version: '1.0.0',
+        docs: '/api/docs',
+        health: '/health',
+        api: '/api/v1',
+      });
+    }
+    next();
+  });
+
   // Security middleware
   app.use(helmet({
     crossOriginEmbedderPolicy: false,
@@ -123,17 +137,6 @@ async function bootstrap() {
   });
 
   logger.log(`📚 API Documentation available at: https://arwapark.digima.cloud/api/docs`);
-
-  // Root redirect
-  app.getHttpAdapter().get('/', (_req, res) => {
-    res.status(200).json({
-      message: 'ArwaPark API is running',
-      version: '1.0.0',
-      docs: '/api/docs',
-      health: '/health',
-      api: '/api/v1',
-    });
-  });
 
   // Health check endpoint
   app.getHttpAdapter().get('/health', (_req, res) => {
