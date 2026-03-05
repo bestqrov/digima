@@ -124,8 +124,19 @@ async function bootstrap() {
 
   logger.log(`📚 API Documentation available at: https://arwapark.digima.cloud/api/docs`);
 
+  // Root redirect
+  app.getHttpAdapter().get('/', (_req, res) => {
+    res.status(200).json({
+      message: 'ArwaPark API is running',
+      version: '1.0.0',
+      docs: '/api/docs',
+      health: '/health',
+      api: '/api/v1',
+    });
+  });
+
   // Health check endpoint
-  app.getHttpAdapter().get('/health', (req, res) => {
+  app.getHttpAdapter().get('/health', (_req, res) => {
     res.status(200).json({
       status: 'ok',
       timestamp: new Date().toISOString(),
