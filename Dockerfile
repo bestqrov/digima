@@ -21,7 +21,7 @@ FROM node:18-alpine AS backend-builder
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
-COPY package*.json ./
+COPY package*.json .npmrc ./
 RUN npm ci && npm cache clean --force
 COPY . .
 RUN npm run build
@@ -37,7 +37,7 @@ RUN apk add --no-cache curl
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json .npmrc ./
 RUN npm ci --only=production && npm cache clean --force
 
 # NestJS compiled output
