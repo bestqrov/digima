@@ -1,9 +1,14 @@
+export interface PopulatedAgency {
+  _id: string;
+  name: string;
+}
+
 export interface User {
   _id: string;
   email: string;
   fullName: string;
   role: 'super_admin' | 'agency_admin' | 'agency_user';
-  agencyId?: string;
+  agencyId?: string | PopulatedAgency;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

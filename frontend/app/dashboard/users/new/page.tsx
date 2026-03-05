@@ -53,7 +53,7 @@ export default function NewUserPage() {
         email: data.email,
         password: data.password,
         role: data.role,
-        agencyId: currentUser?.agencyId, // Will be set by backend based on current user
+        agencyId: typeof currentUser?.agencyId === 'object' ? currentUser.agencyId._id : currentUser?.agencyId, // Will be set by backend based on current user
       };
 
       await createUser(userData);
