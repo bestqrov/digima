@@ -64,12 +64,12 @@ export default function SystemStatus({ className = '', showDetails = false }: Sy
   const getStatusIcon = () => {
     switch (status.status) {
       case 'online':
-        return <CheckCircleIcon className=\"w-4 h-4 text-green-600\" />;
+        return <CheckCircleIcon className="w-4 h-4 text-green-600" />;
       case 'maintenance':
-        return <ExclamationTriangleIcon className=\"w-4 h-4 text-yellow-600\" />;
+        return <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600" />;
       case 'offline':
       default:
-        return <XCircleIcon className=\"w-4 h-4 text-red-600\" />;
+        return <XCircleIcon className="w-4 h-4 text-red-600" />;
     }
   };
 
@@ -123,8 +123,8 @@ export default function SystemStatus({ className = '', showDetails = false }: Sy
 
   return (
     <div className={`rounded-lg border ${getStatusColor()} p-4 ${className}`}>
-      <div className=\"flex items-center justify-between mb-2\">
-        <div className=\"flex items-center\">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
           {getStatusIcon()}
           <span className={`ml-2 font-medium ${getTextColor()}`}>
             {getStatusText()}
@@ -133,29 +133,29 @@ export default function SystemStatus({ className = '', showDetails = false }: Sy
         <button
           onClick={checkSystemStatus}
           disabled={loading}
-          className=\"text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50\"
+          className="text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
         >
           {loading ? 'Checking...' : 'Refresh'}
         </button>
       </div>
       
       {showDetails && (
-        <div className=\"space-y-2 text-sm\">
-          <div className=\"flex justify-between\">
-            <span className=\"text-gray-600\">Version:</span>
-            <span className=\"font-mono text-gray-800\">v{status.version}</span>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Version:</span>
+            <span className="font-mono text-gray-800">v{status.version}</span>
           </div>
           
           {status.responseTime && (
-            <div className=\"flex justify-between\">
-              <span className=\"text-gray-600\">Response Time:</span>
-              <span className=\"font-mono text-gray-800\">{status.responseTime}ms</span>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Response Time:</span>
+              <span className="font-mono text-gray-800">{status.responseTime}ms</span>
             </div>
           )}
           
-          <div className=\"flex justify-between\">
-            <span className=\"text-gray-600\">Last Check:</span>
-            <span className=\"font-mono text-gray-800\">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Last Check:</span>
+            <span className="font-mono text-gray-800">
               {new Date(status.timestamp).toLocaleTimeString()}
             </span>
           </div>
