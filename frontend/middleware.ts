@@ -30,10 +30,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // If user is not authenticated and accessing root, redirect to login
-  if (!token && pathname === '/') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
+  // Unauthenticated users can view the landing page at '/'
 
   return NextResponse.next();
 }
