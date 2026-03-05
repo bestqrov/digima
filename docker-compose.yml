@@ -81,7 +81,28 @@ services:
       retries: 3
       start_period: 60s
 
-  # Nginx Reverse Proxy (for production)
+  # ArwaPark Frontend (Next.js)
+  arwapark-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: arwa-park-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://arwapark.digima.cloud}
+    depends_on:
+      - arwa-park-api
+    networks:
+      - arwa-park-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
     container_name: arwa-park-nginx
@@ -90,11 +111,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - nginx_logs:/var/log/nginx
     depends_on:
       - arwa-park-api
+      - arwapark-frontend
     networks:
       - arwa-park-network
 
